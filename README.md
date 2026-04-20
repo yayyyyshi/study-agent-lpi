@@ -2,45 +2,41 @@
 
 ## 🚀 Overview
 
-The **Study Weakness Analyzer Agent** is an AI-powered tool that helps students identify their weak areas and improve their study strategy.
+This project is an AI-powered agent that analyzes a student’s learning weaknesses and provides actionable improvement strategies.
 
-It takes a user’s problem (e.g., difficulty in Data Structures), analyzes it using structured tool inputs, and generates a clear, actionable improvement plan using a local LLM.
+The agent combines:
+
+* Structured knowledge from LPI tools
+* Reasoning from a local LLM (llama3 via Ollama)
+
+It produces explainable outputs by clearly linking recommendations to retrieved data.
 
 ---
 
 ## 🎯 Features
 
-* Accepts natural language input from users
-* Simulates querying multiple LPI tools
-* Uses a local LLM (Ollama - llama3) for analysis
-* Provides:
+* Accepts user study problems as input
+* Retrieves relevant knowledge using LPI tools
+* Processes results using a local LLM
+* Generates:
 
-  * Weakness breakdown
-  * Study plan
-  * Learning strategy
-* Clearly cites sources used (Explainable AI)
+  * Weakness analysis
+  * Improvement plan
+  * Study strategy
+* Provides explainable outputs with reasoning
 
 ---
 
 ## 🧠 How It Works
 
-1. User enters a study-related problem
+1. User provides input (e.g., difficulty in data structures)
 2. Agent queries:
 
-   * **LPI Tool 1** → Concept understanding
-   * **LPI Tool 2** → Practice strategies
-3. Data is combined and sent to the LLM
-4. LLM generates structured analysis
-5. Agent outputs results with sources
-
----
-
-## 🛠️ Tech Stack
-
-* Python
-* Ollama (llama3 local LLM)
-* Subprocess module
-* Simulated LPI tools (can be replaced with real endpoints)
+   * `smile_overview`
+   * `query_knowledge`
+3. Data is retrieved from tools
+4. Combined input is passed to the LLM
+5. LLM generates structured output with reasoning
 
 ---
 
@@ -54,62 +50,55 @@ python agent.py
 
 ## 🧪 Example
 
-### 🧾 Input
+### Input
 
-```
-I am struggling with Data Structures, especially trees and graphs. I understand theory but cannot solve problems.
-```
+I struggle with data structures, especially trees and graphs.
 
 ---
 
-### 📊 Output
+### Output
 
-```
-=== ANALYSIS ===
+Weakness:
 
-Weakness Identified:
-- Lack of practical problem-solving experience in trees and graphs
-- Difficulty applying theoretical knowledge to coding problems
+* Difficulty applying concepts to problems
 
-Improvement Plan:
-- Start with basic problems on trees (traversals, BST)
-- Practice graph algorithms like BFS and DFS daily
-- Use platforms like LeetCode or HackerRank
+Plan:
 
-Study Strategy:
-- Break problems into smaller parts
-- Practice 3–5 problems daily
-- Revise concepts after solving problems
+* Practice BFS/DFS
+* Solve 3 problems daily
 
-=== SOURCES USED ===
-['LPI Tool 1', 'LPI Tool 2']
-```
+Reason:
+
+* Based on data retrieved from LPI tools
 
 ---
 
 ## 📌 Explainability
 
-This agent explicitly shows which tools contributed to the final answer:
+The agent explains recommendations **because** it uses outputs retrieved from LPI tools like `smile_overview` and `query_knowledge`.
 
-* LPI Tool 1 → Conceptual understanding
-* LPI Tool 2 → Practice strategies
+---
 
-This ensures transparency in how the output is generated.
+## 🛠️ Tech Stack
+
+* Python
+* Ollama (llama3)
+* Subprocess execution
+* Simulated LPI tool calls
 
 ---
 
 ## 🔮 Future Improvements
 
-* Integrate real LPI tool APIs
-* Add progress tracking over time
-* Personalize recommendations using user history
-* Add visualization for learning progress
+* Integrate real LPI APIs
+* Track user learning progress
+* Add visualization dashboard
 
 ---
 
-## 📎 Project Purpose
+## 📎 Purpose
 
-This project was built as part of the **LifeAtlas LPI Level 3 Challenge** to demonstrate:
+Built as part of the LifeAtlas LPI Level 3 Challenge to demonstrate:
 
 * Agent design
 * Tool + LLM integration
