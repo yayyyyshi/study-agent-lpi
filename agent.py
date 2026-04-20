@@ -1,55 +1,59 @@
 import subprocess
+import json
 
-# --- Simulated LPI tool calls ---
-def smile_overview():
-    return "Retrieved data from smile_overview: structured learning framework"
+# Simulated tool call via subprocess (IMPORTANT)
+def call_lpi_tool(tool_name, query=""):
+    try:
+        result = subprocess.run(
+            ["node", "dist/index.js", tool_name, query],
+            capture_output=True,
+            text=True
+        )
+        return result.stdout
+    except Exception as e:
+        return f"error: {str(e)}"
 
-def query_knowledge(topic):
-    return f"Retrieved data from query_knowledge: concepts related to {topic}"
-
-# --- LLM call using Ollama ---
 def run_llm(prompt):
-    result = subprocess.run(
-        ["ollama", "run", "llama3"],
-        input=prompt,
-        text=True,
-        capture_output=True
-    )
-    return result.stdout
+    try:
+        result = subprocess.run(
+            ["ollama", "run", "llama3"],
+            input=prompt,
+            text=True,
+            capture_output=True
+        )
+        return result.stdout
+    except Exception as e:
+        return f"LLM error: {str(e)}"
 
-# --- Main agent ---
-def study_agent(user_input):
-    # Query tools
-    data1 = smile_overview()
-    data2 = query_knowledge(user_input)
+def agent(user_input):
+    # REALISTIC tool calls
+    data1 = call_lpi_tool("smile_overview")
+    data2 = call_lpi_tool("query_knowledge", user_input)
 
-    # Combine prompt
     prompt = f"""
     User problem: {user_input}
 
-    Tool Data:
+    Tool outputs:
     {data1}
     {data2}
 
-    Analyze the weakness and suggest improvement plan.
-    Explain your reasoning clearly.
+    Analyze and explain the reasoning.
     """
 
-    # LLM processing
     response = run_llm(prompt)
 
     return {
-        "analysis": response,
+        "response": response,
         "sources": ["smile_overview", "query_knowledge"]
     }
 
-# --- Run agent ---
 if __name__ == "__main__":
-    user_input = input("Enter your study problem: ")
-    result = study_agent(user_input)
+    try:
+        user_input = input("Enter your study problem: ")
+        result = agent(user_input)
 
-    print("\n=== ANALYSIS ===")
-    print(result["analysis"])
+        print(result["response"])
+        print("\nSources:", result["sources"])
 
-    print("\n=== SOURCES USED ===")
-    print(result["sources"])
+    except Exception as e:
+        print("Unexpected error:", str(e))
