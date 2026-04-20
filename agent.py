@@ -1,59 +1,111 @@
 import subprocess
 import json
 
-# Simulated tool call via subprocess (IMPORTANT)
+# --- LPI Tool Caller ---
 def call_lpi_tool(tool_name, query=""):
     try:
         result = subprocess.run(
-            ["node", "dist/index.js", tool_name, query],
+            ["node", "dist/index.js", "tools/call", tool_name, query],
             capture_output=True,
-            text=True
+            text=True,
+            timeout=10
         )
-        return result.stdout
-    except Exception as e:
-        return f"error: {str(e)}"
 
+        if result.returncode != 0:
+            return f"Error calling {tool_name}: {result.stderr}"
+
+        return result.stdout.strip()
+
+    except Exception as e:
+        return f"Exception while calling {tool_name}: {str(e)}"
+
+
+# --- LLM Runner (Ollama) ---
 def run_llm(prompt):
     try:
         result = subprocess.run(
             ["ollama", "run", "llama3"],
             input=prompt,
             text=True,
-            capture_output=True
+            capture_output=True,
+            timeout=20
         )
-        return result.stdout
+
+        if result.returncode != 0:
+            return f"LLM error: {result.stderr}"
+
+        return result.stdout.strip()
+
     except Exception as e:
-        return f"LLM error: {str(e)}"
+        return f"LLM exception: {str(e)}"
 
-def agent(user_input):
-    # REALISTIC tool calls
-    data1 = call_lpi_tool("smile_overview")
-    data2 = call_lpi_tool("query_knowledge", user_input)
 
+# --- Agent Logic ---
+def study_agent(user_input):
+
+    # Input validation (important for robustness)
+    if not user_input or not user_input.strip():
+        return {
+            "analysis": "Please provide a valid study problem.",
+            "sources": [],
+            "raw_data": {}
+        }
+
+    # --- Tool Calls ---
+    tool1_data = call_lpi_tool("smile_overview")
+    tool2_data = call_lpi_tool("query_knowledge", user_input)
+
+    # Debug / transparency output
+    print("\n--- RAW TOOL OUTPUT ---")
+    print("\n[smile_overview]:\n", tool1_data[:300])
+    print("\n[query_knowledge]:\n", tool2_data[:300])
+
+    # --- Prompt Construction ---
     prompt = f"""
-    User problem: {user_input}
+    A student says: "{user_input}"
 
-    Tool outputs:
-    {data1}
-    {data2}
+    Data retrieved from tools:
 
-    Analyze and explain the reasoning.
+    smile_overview:
+    {tool1_data}
+
+    query_knowledge:
+    {tool2_data}
+
+    Based on this data:
+
+    1. Identify the student's weakness
+    2. Suggest a clear improvement plan
+    3. Explain the reasoning (must reference tool data)
+
+    Keep it simple and actionable.
     """
 
-    response = run_llm(prompt)
+    # --- LLM Processing ---
+    llm_response = run_llm(prompt)
 
     return {
-        "response": response,
-        "sources": ["smile_overview", "query_knowledge"]
+        "analysis": llm_response,
+        "sources": ["smile_overview", "query_knowledge"],
+        "raw_data": {
+            "smile_overview": tool1_data,
+            "query_knowledge": tool2_data
+        }
     }
 
+
+# --- Main Runner ---
 if __name__ == "__main__":
     try:
         user_input = input("Enter your study problem: ")
-        result = agent(user_input)
 
-        print(result["response"])
-        print("\nSources:", result["sources"])
+        result = study_agent(user_input)
+
+        print("\n=== ANALYSIS ===")
+        print(result["analysis"])
+
+        print("\n=== SOURCES USED ===")
+        print(result["sources"])
 
     except Exception as e:
-        print("Unexpected error:", str(e))
+        print("Unexpected system error:", str(e))
